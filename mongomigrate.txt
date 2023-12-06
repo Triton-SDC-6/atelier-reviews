@@ -1,0 +1,1 @@
+mongoimport --db sdc_reviews --collection characteristics --file sample_characteristic_reviews.csv  --type csv --port 27017 --headerline
