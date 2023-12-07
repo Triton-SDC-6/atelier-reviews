@@ -1,0 +1,27 @@
+{
+  "name": "atelier-reviews",
+  "version": "1.0.0",
+  "description": "reviews server",
+  "main": "index.html",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Triton-SDC-6/atelier-reviews.git"
+  },
+  "author": "Clay Gibson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Triton-SDC-6/atelier-reviews/issues"
+  },
+  "homepage": "https://github.com/Triton-SDC-6/atelier-reviews#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
+    "morgan": "^1.10.0",
+    "path": "^0.12.7"
+  }
+}
