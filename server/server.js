@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const { getReviews, getMeta } = require('./db')
 
 const app = express();
 
@@ -21,14 +22,31 @@ app.use(express.static(path.join(__dirname, '../client')));
 
 app.get('/reviews/', (req, res) => {
   // console.log(req)
+  const page = Number(req.query.page) || 1
+  const count = Number(req.query.count) || 5
+  const product_id = Number(req.query.product_id);
+  let sort = req.query.sort || 'newest'
 
-  const product_id = req.query.product_id;
-  res.status(200).send(product_id)
+  if (sort === 'helpful' || sort === 'relevant') {
+    sort = { 'helpfulness': -1, 'date': -1 }
+  }
+  else {
+    sort = { 'date': -1 }
+  }
 
+  getReviews(product_id, count, page, sort,).then((result) => {
+    res.status(200).json(result)
+  }).catch((err) => { console.log(err) })
 
-  // fetch(search ? search : '').then((data) => {
-  //   res.send(data);
-  // })
+})
+
+app.get('/reviews/meta/', (req, res) => {
+  const product_id = Number(req.query.product_id);
+
+  getMeta(product_id).then((result) => {
+    res.status(200).json(result)
+  }).catch((err) => { console.log(err) })
+
 })
 
 
