@@ -1,0 +1,95 @@
+require("dotenv").config();
+const express = require("express");
+const path = require("path");
+const morgan = require('morgan')
+const bodyParser = require('body-parser')
+const { getReviews, getMeta, putHelpful, putReported, postNew } = require('./db')
+
+const app = express();
+
+app.use(bodyParser.json())
+app.use(morgan('dev'))
+app.use(express.static(path.join(__dirname, '../client')));
+
+// app.post('/glossary', (req, res) => {
+//   if (req.body && req.body.term) {
+//     save(req.body.term, req.body.definition).then(() => {
+//       res.send('posted')
+//     })
+//   }
+// })
+
+
+app.get('/reviews/', (req, res) => {
+  // console.log(req)
+  const page = Number(req.query.page) || 1
+  const count = Number(req.query.count) || 5
+  const product_id = Number(req.query.product_id);
+  let sort = req.query.sort || 'newest'
+
+  if (sort === 'helpful' || sort === 'relevant') {
+    sort = { 'helpfulness': -1, 'date': -1 }
+  }
+  else {
+    sort = { 'date': -1 }
+  }
+
+  getReviews(product_id, count, page, sort,).then((result) => {
+    res.status(200).json(result)
+  }).catch((err) => { console.log(err) })
+
+})
+
+app.get('/reviews/meta/', (req, res) => {
+  const product_id = Number(req.query.product_id);
+
+  getMeta(product_id).then((result) => {
+    res.status(200).json(result)
+  }).catch((err) => { console.log(err) })
+
+})
+
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  const review_id = Number(req.params.review_id);
+  putHelpful(review_id).then(() => {
+    res.status(204).send()
+  }).catch((err) => { console.log(err) });
+})
+
+app.put('/reviews/:review_id/report', (req, res) => {
+  const review_id = Number(req.params.review_id);
+  putReported(review_id).then(() => {
+    res.status(204).send()
+  }).catch((err) => { console.log('error is in server', err) });
+})
+
+app.post('/reviews', (req, res) => {
+  postNew(req.body);
+  res.status(201).send();
+})
+
+const dataTest = {
+  product_id: 250,
+  rating: 4,
+  summary: 'Test Data Summary',
+  body: 'Test of the Body text insert text here',
+  recommend: true,
+  name: 'clay',
+  email: 'you@you.com',
+  photos: ['wwww.test.com', 'www.test2.com'],
+  characteristics: {
+    'Fit': 4,
+    'Length': 4,
+    'Comfort': 4,
+    'Quality': 4,
+
+  }
+
+
+}
+
+console.log(JSON.stringify(dataTest))
+
+
+app.listen(process.env.PORT);
+console.log(`Listening at http://localhost:${process.env.PORT}`);
