@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
-const { getReviews, getMeta } = require('./db')
+const { getReviews, getMeta, putHelpful, putReported, postNew } = require('./db')
 
 const app = express();
 
@@ -49,6 +49,46 @@ app.get('/reviews/meta/', (req, res) => {
 
 })
 
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  const review_id = Number(req.params.review_id);
+  putHelpful(review_id).then(() => {
+    res.status(204).send()
+  }).catch((err) => { console.log(err) });
+})
+
+app.put('/reviews/:review_id/report', (req, res) => {
+  const review_id = Number(req.params.review_id);
+  putReported(review_id).then(() => {
+    res.status(204).send()
+  }).catch((err) => { console.log('error is in server', err) });
+})
+
+app.post('/reviews', (req, res) => {
+  postNew(req.body);
+  res.status(201).send();
+})
+
+const dataTest = {
+  product_id: 250,
+  rating: 4,
+  summary: 'Test Data Summary',
+  body: 'Test of the Body text insert text here',
+  recommend: true,
+  name: 'clay',
+  email: 'you@you.com',
+  photos: ['wwww.test.com', 'www.test2.com'],
+  characteristics: {
+    'Fit': 4,
+    'Length': 4,
+    'Comfort': 4,
+    'Quality': 4,
+
+  }
+
+
+}
+
+console.log(JSON.stringify(dataTest))
 
 
 app.listen(process.env.PORT);

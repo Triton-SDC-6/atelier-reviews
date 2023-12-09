@@ -59,6 +59,7 @@ db.merged_char.aggregate([
       _id: "$product_id",
       characteristics: {
         $push: {
+          _id: ObjectId(), //todo fix this
           name: "$name",
           ratings: "$ratings"
         }
@@ -101,4 +102,5 @@ db.tmp_photos.drop()
 db.tmp_reviews.drop()
 
 db.reviews.createIndex({ product_id: -1 })
+db.reviews.createIndex({ id: -1 })
 

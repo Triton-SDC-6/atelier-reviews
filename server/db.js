@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const uri = `mongodb://localhost:27017/${process.env.DB_NAME}`;
 const client = new MongoClient(uri);
 const db = client.db("sdc_reviews")
@@ -22,56 +22,85 @@ async function getReviews(product_id, limit, page, sorting) {
 async function getMeta(productId) {
   let meta = {
     product_id: productId.toString(),
-    "ratings": {
-      "1": "155",
-      "2": "219",
-      "3": "341",
-      "4": "364",
-      "5": "763"
-    },
-    "recommended": {
-      "false": "465",
-      "true": "1377"
-    },
-    "characteristics": {
-      "Fit": {
-        "id": 135219,
-        "value": "3.2370766488413547"
-      },
-      "Length": {
-        "id": 135220,
-        "value": "3.2798541476754786"
-      },
-      "Comfort": {
-        "id": 135221,
-        "value": "3.3731060606060606"
-      },
-      "Quality": {
-        "id": 135222,
-        "value": "3.3389355742296919"
+  };
+
+  const ratings = await db.collection('reviews').aggregate([
+    { $match: { 'product_id': productId } },
+    { $group: { _id: "$rating", count: { $sum: 1 } } }
+  ]).toArray()
+
+  let ratingsObj = {}
+  ratings.forEach((rating) => {
+    ratingsObj[rating._id] = rating.count.toString();
+  })
+
+  meta["ratings"] = ratingsObj;
+
+  const recommends = await db.collection('reviews').aggregate([
+    { $match: { 'product_id': productId } },
+    { $group: { _id: "$recommend", count: { $sum: 1 } } }
+  ]).toArray();
+
+  let recomendsObj = {}
+  recommends.forEach((obj) => {
+    recomendsObj[obj._id] = obj.count.toString();
+  })
+
+  meta["recommended"] = recomendsObj;
+
+  const characteristics = await db.collection('characteristics').aggregate([
+    { $match: { '_id': productId } },
+    { $unwind: '$characteristics' },
+    { $unwind: '$characteristics.ratings' },
+    {
+      $group: {
+        _id: { id: '$characteristics._id', name: '$characteristics.name' },
+        value: { $avg: '$characteristics.ratings.value' }
       }
     }
-  };
+  ]).toArray();
+
+  let charObj = {};
+  characteristics.forEach((char) => {
+    charObj[char._id.name] = { value: char.value.toString() }
+  })
+
+  meta["characteristics"] = charObj;
+
+
   return meta
 };
 
-module.exports = { getReviews, getMeta }
+async function putHelpful(reviewId) {
+  console.log('reviewId', reviewId)
+  try {
+    await db.collection('reviews').updateOne({ 'id': reviewId }, { $inc: { 'helpfulness': 1 } })
+  } catch (err) {
+    console.log(err, 'ErOrR')
+  }
+}
+async function putReported(reviewId) {
+  console.log('reviewId report', reviewId)
+  try {
+    await db.collection('reviews').updateOne({ 'id': reviewId }, { $set: { 'reported': true } })
+  } catch (err) {
+    return err
+  }
+}
 
+async function postNew(body) {
+  const characteristics = body.characteristics
+  delete body.characteristics
+  console.log(characteristics)
+  await db.collection('reviews').insertOne(body)
+  await Object.keys(characteristics).forEach((char) => {
+    db.collection('characteristics').updateOne(
+      { '_id': body.product_id, 'characteristics.name': char },
+      { $push: { "characteristics.$.ratings": { _id: new ObjectId(), value: characteristics[char] } } }
 
+    )
+  })
+}
 
-// async function main() {
-
-//   try {
-//     await client.connect();
-
-//     await listDatabases(client);
-
-//   } catch (e) {
-//     console.error(e);
-//   } finally {
-//     await client.close();
-//   }
-// };
-
-// main().catch(console.error);
+module.exports = { getReviews, getMeta, putHelpful, putReported, postNew };
 
