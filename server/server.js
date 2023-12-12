@@ -1,4 +1,5 @@
 require("dotenv").config();
+require('newrelic');
 const express = require("express");
 const path = require("path");
 const morgan = require('morgan')
@@ -11,17 +12,7 @@ app.use(bodyParser.json())
 app.use(morgan('dev'))
 app.use(express.static(path.join(__dirname, '../client')));
 
-// app.post('/glossary', (req, res) => {
-//   if (req.body && req.body.term) {
-//     save(req.body.term, req.body.definition).then(() => {
-//       res.send('posted')
-//     })
-//   }
-// })
-
-
 app.get('/reviews/', (req, res) => {
-  // console.log(req)
   const page = Number(req.query.page) || 1
   const count = Number(req.query.count) || 5
   const product_id = Number(req.query.product_id);
@@ -35,17 +26,30 @@ app.get('/reviews/', (req, res) => {
   }
 
   getReviews(product_id, count, page, sort,).then((result) => {
+    if (!product_id) {
+      throw new Error('Invalid product id')
+    }
     res.status(200).json(result)
-  }).catch((err) => { console.log(err) })
+  }).catch((err) => {
+    res.status(404).send(
+      err.message
+    )
+  })
 
 })
 
 app.get('/reviews/meta/', (req, res) => {
   const product_id = Number(req.query.product_id);
-
   getMeta(product_id).then((result) => {
+    if (!product_id) {
+      throw new Error('Invalid product id')
+    }
     res.status(200).json(result)
-  }).catch((err) => { console.log(err) })
+  }).catch((err) => {
+    res.status(404).send(
+      err.message
+    )
+  })
 
 })
 

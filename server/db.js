@@ -8,16 +8,13 @@ client.connect()
 
 async function getReviews(product_id, limit, page, sorting) {
 
-  try {
-    reviews = await db.collection("reviews")
-      .find({ "product_id": product_id })
-      .skip(limit * (page - 1))
-      .limit(limit).sort(sorting)
-      .toArray();
-    return reviews;
-  } catch (error) {
-    return error
-  }
+  reviews = await db.collection("reviews")
+    .find({ "product_id": product_id })
+    .skip(limit * (page - 1))
+    .limit(limit).sort(sorting)
+    .toArray();
+  return reviews;
+
 };
 async function getMeta(productId) {
   let meta = {
@@ -76,7 +73,8 @@ async function putHelpful(reviewId) {
   try {
     await db.collection('reviews').updateOne({ 'id': reviewId }, { $inc: { 'helpfulness': 1 } })
   } catch (err) {
-    console.log(err, 'ErOrR')
+    throw new Error('Something went wrong with your request', err)
+
   }
 }
 async function putReported(reviewId) {
