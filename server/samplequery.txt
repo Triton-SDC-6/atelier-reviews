@@ -2,3 +2,8 @@ https://app-hrsei-api.herokuapp.com/api/fec2/hr-rfp/reviews/meta/?product_id=403
 
 localhost:3000/reviews/12323/helpful
 
+scp -i hackreactor-sdc-2.pem testSCP.txt ubuntu@ec2-3-89-164-21.compute-1.amazonaws.com:~/.
+testSCP.txt
+scp -i hackreactor-sdc-2.pem testSCP.txt ubuntu@ec2-3-89-164-21.compute-1.amazonaws.com:~/.
+testSCP.txt
+

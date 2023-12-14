@@ -109,3 +109,6 @@ db.reviews.createIndex({ id: -1 })
 
 //mongodump --host="mongodb://localhost" --port=27017 --db=sdc_reviews
 //mongodump --db=sdc_reviews
+
+
+//SCP
