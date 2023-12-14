@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { MongoClient, ObjectId } = require('mongodb');
-const uri = `mongodb://localhost:27017/${process.env.DB_NAME}`;
+const uri = `mongodb://${process.env.CONNECTION}:27017/${process.env.DB_NAME}`;
 const client = new MongoClient(uri);
 const db = client.db("sdc_reviews")
 
