@@ -1,14 +1,12 @@
 require("dotenv").config();
 require('newrelic');
 const express = require("express");
-const compression = require('compression')
 const path = require("path");
 const bodyParser = require('body-parser')
 const { getReviews, getMeta, putHelpful, putReported, postNew } = require('./db')
 
 const app = express();
 
-app.use(compression())
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, '../client')));
 
@@ -53,8 +51,8 @@ app.get('/reviews/meta/', (req, res) => {
 
 })
 
-app.get('/loaderio-bb786447e36be9e4fe7ece9d745c67ed.txt', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../loaderio-bb786447e36be9e4fe7ece9d745c67ed.txt'))
+app.get('/loaderio-6e378e0dcc2a677710be0b7a36472fab.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../loaderio-6e378e0dcc2a677710be0b7a36472fab.txt'))
 })
 
 app.put('/reviews/:review_id/helpful', (req, res) => {
