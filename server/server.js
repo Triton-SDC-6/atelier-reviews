@@ -1,12 +1,14 @@
 require("dotenv").config();
 require('newrelic');
 const express = require("express");
+const compression = require('compression')
 const path = require("path");
 const bodyParser = require('body-parser')
 const { getReviews, getMeta, putHelpful, putReported, postNew } = require('./db')
 
 const app = express();
 
+app.use(compression())
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, '../client')));
 
